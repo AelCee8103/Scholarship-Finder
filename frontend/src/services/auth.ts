@@ -18,7 +18,30 @@ export const loginUser = async (data: LoginData) => {
     return res.json();
 };
 
+export const fetchUserProfile = async (token: string) => {
+    try{
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/users/me`, {
+        method: "GET",
+        credentials: 'include',
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+        },
+    });
+
+    if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Failed to fetch user profile");
+    }
+    return res.json();
+    } catch (error) {
+        console.error("Error fetching user profile:", error);
+        return null;
+    }
+}
+
 export interface RegisterData {
+    id: string;
     fullname: string;
     email: string;
     password: string;

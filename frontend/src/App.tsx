@@ -9,7 +9,6 @@ const Scholarship = React.lazy(() => import('./pages/Scholarship'))
 const Scholarshipdetails = React.lazy(() => import('./pages/Scholarshipdetails'))
 const Profile = React.lazy(() => import('./pages/Profile'))
 const ApplicationStudent = React.lazy(() => import('./pages/ApplicationStudent'))
-const ChatPage = React.lazy(() => import('./pages/Chat'))
 const Orgdashboard = React.lazy(() => import('./organization/orgdashboard'))
 const ManageScholar = React.lazy(() => import('./organization/ManageScholar'))
 const Archive = React.lazy(() => import('./organization/Archive'))
@@ -142,17 +141,7 @@ function App() {
                   }
                 />
 
-                {/* Chat route - accessible to both students and organizations */}
-                <Route
-                  path="/chat"
-                  element={
-                    <ProtectedRoute allowedRoles={['STUDENT', 'ORGANIZATION']}>
-                      <div className={!isOnline ? 'pt-16' : ''}>
-                        <ChatPage />
-                      </div>
-                    </ProtectedRoute>
-                  }
-                />
+               
 
 
                 {/* Protected organization routes */}

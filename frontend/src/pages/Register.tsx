@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'react-hot-toast';
+import { registerUser } from '@/services/auth';
 
 const schema = z
     .object({
@@ -62,23 +63,14 @@ export default function Register() {
             if (authError) throw authError;
             if (!authData.user) throw new Error('Registration failed');
 
-            // Create user profile in backend database
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/users/register`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    id: authData.user.id,
-                    fullname: data.fullname,
-                    email: data.email,
-                    role: data.role,
-                }),
+            // Create user profile in our backend (wait for it and propagate errors)
+            await registerUser({
+                id: authData.user.id,
+                fullname: data.fullname,
+                email: data.email,
+                password: data.password,
+                role: data.role,
             });
-
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.message || 'Failed to create user profile');
-            }
 
             return { user: authData.user, email: data.email };
         },
@@ -272,11 +264,9 @@ export default function Register() {
                                     className="w-full h-11 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition"
                                 >
                                     {isSubmitting ? (
-                                        <span>
-                                            <svg className="inline-block mr-2 w-5 h-5 animate-spin" viewBox="0 0 24 24">
-                                                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" />
-                                            </svg>
-                                            Creating account...
+                                        <span className="inline-flex items-center" aria-live="polite" aria-busy="true">
+                                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" aria-hidden="true" />
+                                            <span>Creating account...</span>
                                         </span>
                                     ) : (
                                         'Create Account'

@@ -95,22 +95,41 @@ const ManageScholar = () => {
     } = useQuery<Scholarship[], Error>({
         queryKey: ['organization-scholarships'],
         queryFn: async () => {
+            // Try with explicit token first (supabase client session), then fall back to cookie-based auth
+            const token = await getToken();
             try {
-                const token = await getToken();
-                const response = await getOrganizationScholarships(token || undefined)
-                console.log(`Loaded ${response.data.length} scholarships for organization:`, user?.id)
-                return response.data
-            } catch (error: any) {
-                // Handle authentication errors
-                if (error?.message?.includes('UNAUTHORIZED')) {
-                    toast.error('Your session has expired. Please log in again.')
-                    logout()
-                    navigate('/login')
-                    throw error
+                if (token) {
+                    const response = await getOrganizationScholarships(token);
+                    console.log(`Loaded ${response.data.length} scholarships for organization:`, user?.id)
+                    return response.data;
                 }
-                // For other errors, show generic message and re-throw
-                toast.error('Failed to load scholarships. Please try again.')
-                throw error
+
+                // If no token available, attempt request relying on HTTP-only cookie
+                const response = await getOrganizationScholarships(undefined);
+                console.log(`Loaded ${response.data.length} scholarships (cookie auth) for organization:`, user?.id)
+                return response.data;
+            } catch (error: any) {
+                // If token attempt failed with UNAUTHORIZED, try fallback once
+                const msg = String(error?.message || error);
+                console.error('Error fetching organization scholarships:', error);
+
+                if (msg.includes('UNAUTHORIZED') || msg.includes('401')) {
+                    // Try fallback without token (cookie-based) before forcing logout
+                    try {
+                        const fallback = await getOrganizationScholarships(undefined);
+                        console.log(`Loaded ${fallback.data.length} scholarships (fallback cookie) for organization:`, user?.id)
+                        return fallback.data;
+                    } catch (fallbackErr: any) {
+                        console.error('Fallback fetch also failed:', fallbackErr);
+                        toast.error('Your session has expired. Please log in again.');
+                        logout();
+                        navigate('/login');
+                        throw fallbackErr;
+                    }
+                }
+
+                toast.error('Failed to load scholarships. Please try again.');
+                throw error;
             }
         },
         enabled: isAuthenticated, // Only run query if authenticated - backend handles organization filtering

@@ -127,7 +127,7 @@ const ApplicationStudent = () => {
     return (
         <>
             <StudentNavbar />
-            <div className="4h-screen bg-gray-50 flex flex-col">
+            <div className="h-screenbg-gray-50 flex flex-col">
                 {/* Scrollable container with custom scrollbar */}
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -142,7 +142,7 @@ const ApplicationStudent = () => {
 
                         <div className="space-y-6">
                             {applications.length === 0 ? (
-                                <Card>
+                                <Card className="border border-gray-200 bg-white shadow-sm rounded-xl">
                                     <CardContent className="py-12">
                                         <div className="text-center">
                                             <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -157,10 +157,10 @@ const ApplicationStudent = () => {
                                 </Card>
                             ) : (
                                 applications.map((application) => (
-                                    <Card key={application.id}>
+                                    <Card key={application.id} className="border border-gray-200 bg-white shadow-sm rounded-xl">
                                         <CardHeader>
                                             <div className="flex justify-between items-start">
-                                                <div>
+                                                <div className='bg-white'>
                                                     <CardTitle className="text-lg">
                                                         {application.scholarship.title}
                                                     </CardTitle>

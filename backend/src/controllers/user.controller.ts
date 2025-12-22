@@ -99,10 +99,10 @@ export const userRegister = async (req: Request, res: Response) => {
         // Check if user exists in Prisma database
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
-            return res.status(400).json({ message: "User profile already exists" });
+            return res.status(400).json({ message: "Email already exists" });
         }
 
-        // Create user in Prisma database with Supabase user ID
+                
         // Note: Password is managed by Supabase Auth, we don't store it
         const response = await withDatabaseRetry(async () => {
             return await prisma.user.create({

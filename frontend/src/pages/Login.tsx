@@ -2,13 +2,13 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../AuthProvider/AuthProvider';
 import { toast } from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { loginUser } from '@/services/auth';
 
-type LoginData = { email: string; password: string };
+interface LoginData { email: string; password: string };
 
 
 
@@ -22,9 +22,8 @@ const Login = () => {
     const [isEmailNotVerified, setIsEmailNotVerified] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    const { login } = useAuth();
 
-    const from = location.state?.from?.pathname || null;
+    const from = location.state?.from?.pathname;
 
     // Memoized validation to prevent unnecessary re-renders
     const validation = useMemo(() => {
@@ -44,6 +43,8 @@ const Login = () => {
         };
     }, [form.email, form.password]);
 
+
+    //LOGIN FUNCTIONALITY USING TANSTACK
     const mutation = useMutation({
         mutationFn: async (credentials: LoginData) => {
             // Sign in with Supabase Auth
@@ -60,24 +61,17 @@ const Login = () => {
                 throw new Error('EMAIL_NOT_VERIFIED: Please verify your email before logging in.');
             }
 
-            // Get user profile from backend (also syncs verification status)
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/users/me`, {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    'Authorization': `Bearer ${authData.session.access_token}`,
-                },
-            });
+            // Call backend to create/validate session and get server-side user (contains role)
+            const serverResp = await loginUser({ email: credentials.email, password: credentials.password });
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch user profile');
+            if (!authData.session?.access_token) {
+                throw new Error('No access token found');
             }
 
-            const userData = await response.json();
-            return { 
-                user: userData.user || userData, 
+            return {
+                user: authData.user,
                 session: authData.session,
-                token: authData.session.access_token 
+                serverUser: serverResp?.user,
             };
         },
         onSuccess: async (data) => {
@@ -85,16 +79,19 @@ const Login = () => {
             setFieldErrors({});
             setIsEmailNotVerified(false);
 
-            // Store token for API calls
-            localStorage.setItem('token', data.token);
 
-            // Store session
-            login(data.user);
+            localStorage.setItem('token', data.session.access_token);
+
+            await supabase.auth.setSession({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token,
+            });
 
             await new Promise(resolve => setTimeout(resolve, 100));
             let redirectPath = from;
             if (!redirectPath) {
-                const role = data?.user?.role?.toString?.() ?? '';
+                
+                const role = (data as any)?.serverUser?.role ?? (data as any)?.user?.user_metadata?.role ?? '';
                 redirectPath = role === 'ORGANIZATION' ? '/orgdashboard' : '/scholarship';
             }
             navigate(redirectPath, { replace: true });

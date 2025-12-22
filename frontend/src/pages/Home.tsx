@@ -122,21 +122,6 @@ const Home = () => {
                                         </Button>
                                     </div>
 
-                                    {/* Trust indicators */}
-                                    <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 sm:gap-6 pt-6 sm:pt-8">
-                                        <div className="flex items-center gap-2">
-                                            <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
-                                            <span className="text-xs sm:text-sm text-gray-600">100% Free</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
-                                            <span className="text-xs sm:text-sm text-gray-600">Verified Opportunities</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
-                                            <span className="text-xs sm:text-sm text-gray-600">Instant Notifications</span>
-                                        </div>
-                                    </div>
                                 </motion.div>
                             </AnimatedSection>
 

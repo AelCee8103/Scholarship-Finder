@@ -32,7 +32,6 @@ const app = express();
 
 app.set('trust proxy', 1);
 
-
 startScholarshipJobs();
 startExpiredScholarshipJob();
 
