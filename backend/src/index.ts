@@ -1,9 +1,11 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express, { Request, Response } from 'express';
 import http from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
 import morgan from 'morgan';
 import userRoutes from './routes/user.routes';
 import { startScholarshipJobs } from './controllers/job/scholarshipJobs';
@@ -15,9 +17,6 @@ import notificationRoutes from './routes/notification.routes';
 import rateLimit from 'express-rate-limit';
 import { initializeSocket } from './services/socketService';
 import { connectRedis } from './config/redisClient';
-
-
-dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 
